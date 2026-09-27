@@ -1,0 +1,32 @@
+name: Java CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: macos-latest
+          java: 17
+          arch: arm64
+          runner: macos-latest
+          expander_leg: macos-latest-17-arm64
+      max-parallel: 2
+    name: Test JDK ${{ matrix.java }}, ${{ matrix.os }} [${{ matrix.expander_leg
+      }}]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: ${{ matrix.distribution || 'zulu' }}
+        java-version: ${{ matrix.java }}
+        architecture: ${{ matrix.arch }}
+    - name: Test with Maven
+      run: mvn test -B --file pom.xml ${{ matrix.mvn_args }}
+    timeout-minutes: 150
